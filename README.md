@@ -1,6 +1,6 @@
-# SMOP - Maps
+[< Back to general](https://github.com/nextmoov/nextmoov-smop-general)
 
-General information : [nextmoov-smop-general](https://github.com/nextmoov/nextmoov-smop-general)
+# SMOP - Maps
 
 Vector tiles service compatible with Mapbox GL js.
 
