@@ -1,5 +1,5 @@
 module.exports = {
-  postgisConnection: 'postgis://gis:gis@postgis/gis',
+  postgisConnection: 'postgis://gis:gis@maps-postgis/gis',
   cacheDir: './tmp/cache',
   remoteOsmUrl: 'http://download.geofabrik.de/europe/belgium-latest.osm.pbf',
   osmFilePath: './tmp/belgium-latest.osm.pbf',
