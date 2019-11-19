@@ -19,7 +19,7 @@ Tested with docker-compose version 1.21.0.
 
 ### Importer
 
-Uses imposm to import OpenStreetMap (OSM) pbf file into a Postgresql database with Postgis extension enabled.
+Acquire OSM pbf file from Geofabrik and uses imposm to import OpenStreetMap (OSM) pbf file into a Postgresql database with Postgis extension enabled.
 
 ### Server
 
