@@ -151,7 +151,8 @@ http.createServer(async (request, response) => {
             'Content-Type': 'application/octet-stream',
             'Content-Length': data.length,
             'Access-Control-Allow-Origin': '*',
-            'Last-Modified': new Date(pgMtime).toUTCString(),
+            'From-Cache' : true,
+            'Last-Modified': fs.statSync(tilePath).mtime.toUTCString(),
           });
 
           response.end(data, 'binary');
@@ -165,6 +166,7 @@ http.createServer(async (request, response) => {
             'Content-Type': 'application/octet-stream',
             'Content-Length': data.length,
             'Access-Control-Allow-Origin': '*',
+            'From-Cache' : false,
             'Last-Modified': new Date(pgMtime).toUTCString(),
           });
 

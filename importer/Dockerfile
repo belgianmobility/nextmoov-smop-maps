@@ -1,4 +1,4 @@
-FROM node:dubnium-stretch-slim
+FROM node:12-buster-slim
 
 COPY ./ /app
 
