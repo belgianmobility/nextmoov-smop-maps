@@ -12,7 +12,9 @@ Acquire OSM pbf file from Geofabrik and uses imposm to import OpenStreetMap (OSM
 
 ### Server
 
-Known issue : the server does not refresh already cached tiles.
+Known issues : the server does not refresh already cached tiles.
+
+You can clear the cache by issuing `docker-compose exec maps-server /app/clear_cache`.
 
 ### Database
 
