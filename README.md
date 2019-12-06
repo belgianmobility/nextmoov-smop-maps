@@ -4,6 +4,18 @@
 
 Vector tiles service compatible with [Mapbox GL js](https://github.com/mapbox/mapbox-gl-js).
 
+
+## Requirements
+  - docker
+
+
+## Running the service
+- clone the repo, and move into the creted folder  
+   `git clone git@github.com:nextmoov/nextmoov-smop-maps.git`
+- run via docker-compose  
+  `docker-compose up`
+
+
 ## Modules
 
 ### Importer
