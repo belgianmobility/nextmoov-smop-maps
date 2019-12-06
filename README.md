@@ -2,13 +2,13 @@
 
 # SMOP - Maps
 
-Vector tiles service compatible with Mapbox GL js.
+Vector tiles service compatible with [Mapbox GL js](https://github.com/mapbox/mapbox-gl-js).
 
 ## Modules
 
 ### Importer
 
-Acquire OSM pbf file from Geofabrik and uses imposm to import OpenStreetMap (OSM) pbf file into a Postgresql database with Postgis extension enabled.
+Acquire OSM pbf file from Geofabrik and uses [imposm](https://imposm.org/) to import [OpenStreetMap (OSM) pbf file](https://wiki.openstreetmap.org/wiki/PBF_Format) into a Postgresql database with [Postgis extension](https://postgis.net/) enabled.
 
 ### Server
 
