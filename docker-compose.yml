@@ -1,0 +1,52 @@
+version: '3.3'
+services:
+  # ----- reverse-proxy --------------------------------------------------------
+  traefik:
+    image: "traefik:2.0"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "8080:80"
+      - "9080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  # ----- maps -----------------------------------------------------------------
+  maps-postgis:
+    build: ./nextmoov-smop-maps/postgis
+    #ports:
+      #- "5432:5432"
+    volumes:
+      - maps-postgis:/var/lib/postgresql/data
+
+  maps-server:
+    build: ./nextmoov-smop-maps/server
+    depends_on:
+      - maps-importer
+      - maps-postgis
+    volumes:
+      - maps-server:/app/cache
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8080"
+      - "traefik.http.routers.maps-server.entrypoints=web"
+      - "traefik.http.routers.maps-server.rule=PathPrefix(`/tiles`)"
+    #ports:
+      #- "8083:80"
+
+  maps-importer:
+    build: ./nextmoov-smop-maps/importer
+    depends_on:
+      - maps-postgis
+    volumes:
+      - maps-importer:/app/tmp
+
+volumes:
+  maps-importer:
+  maps-postgis:
+  maps-server:
+  
