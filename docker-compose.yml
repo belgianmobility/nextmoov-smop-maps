@@ -17,14 +17,14 @@ services:
 
   # ----- maps -----------------------------------------------------------------
   maps-postgis:
-    build: ./nextmoov-smop-maps/postgis
+    build: ./postgis
     #ports:
       #- "5432:5432"
     volumes:
       - maps-postgis:/var/lib/postgresql/data
 
   maps-server:
-    build: ./nextmoov-smop-maps/server
+    build: ./server
     depends_on:
       - maps-importer
       - maps-postgis
@@ -39,7 +39,7 @@ services:
       #- "8083:80"
 
   maps-importer:
-    build: ./nextmoov-smop-maps/importer
+    build: ./importer
     depends_on:
       - maps-postgis
     volumes:
