@@ -7,6 +7,7 @@ Vector tiles service compatible with [Mapbox GL js](https://github.com/mapbox/ma
 
 ## Requirements
   - docker
+  - docker-compose
 
 
 ## Running the service
