@@ -23,6 +23,10 @@ Vector tiles service compatible with [Mapbox GL js](https://github.com/mapbox/ma
 ![Software Architecture - Map server_](https://user-images.githubusercontent.com/10850995/70332430-d5f89380-1841-11ea-8d34-812969f6a27d.jpg)
 
 
+#### illustration
+<img width="675" alt="Screenshot 2019-12-16 at 13 37 24" src="https://user-images.githubusercontent.com/10850995/70907760-00004180-200a-11ea-8d0e-8a9f54c97896.png">
+
+
 ## Modules
 
 ### Importer
