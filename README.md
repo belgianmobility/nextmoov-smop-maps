@@ -5,7 +5,7 @@
 Vector tiles service compatible with Mapbox GL js.
 
 #### illustration
-![Screenshot 2019-12-06 at 11 40 50](https://user-images.githubusercontent.com/10850995/70317080-5658cd80-181d-11ea-8ed6-185fb28f41ec.png)
+<img width="675" alt="Screenshot 2019-12-16 at 13 37 24" src="https://user-images.githubusercontent.com/10850995/70907760-00004180-200a-11ea-8d0e-8a9f54c97896.png">
 
 
 ## Modules
