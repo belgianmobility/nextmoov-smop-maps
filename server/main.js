@@ -108,82 +108,115 @@ function genQuery(type, x, y, z) {
   `;
 }
 
+async function serverTile(res, request, response) {
+  const pgClient = await pgPool.connect();
+
+  // ---- Check mtime from database.
+  const pgMtime = await getPgMtime(pgClient);
+
+  let done = false;
+
+  if (request.headers['if-modified-since']) {
+    const remoteMTime = new Date(request.headers['if-modified-since']).getTime();
+
+    if (remoteMTime === pgMtime) {
+      response.writeHead(304, {
+        'Access-Control-Allow-Origin': '*',
+        'Last-Modified': new Date(pgMtime).toUTCString(),
+      });
+
+      response.end();
+
+      done = true;
+    }
+  }
+
+  if (!done) {
+    const {
+      type, x, y, z,
+    } = res.groups;
+
+    // ----- Check if tile is already in the cache.
+    const tilePath = path.join(CONFIG.cacheDir, `${type}/${z}/${x}/${y}.pbf`);
+
+    if (fs.existsSync(tilePath)) {
+      // ----- Send cached tile to to client.
+      const data = fs.readFileSync(tilePath);
+
+      response.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': data.length,
+        'Access-Control-Allow-Origin': '*',
+        'From-Cache': true,
+        'Last-Modified': fs.statSync(tilePath).mtime.toUTCString(),
+      });
+
+      response.end(data, 'binary');
+    } else {
+      // ----- Get tile data from database.
+      const pgRes = await pgClient.query(genQuery(type, x, y, z));
+      const data = pgRes.rows[0].st_asmvt;
+
+      // ----- Send answer to client.
+      response.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-Length': data.length,
+        'Access-Control-Allow-Origin': '*',
+        'From-Cache': false,
+        'Last-Modified': new Date(pgMtime).toUTCString(),
+      });
+
+      response.end(data, 'binary');
+
+      // ----- Save generated tile in cache.
+      // Temporary name in case we have concurrent connection asking for the same tile.
+      const tmpTilePath = `${tilePath}.tmp_${new Date().getTime()}`;
+
+      mkdirp.sync(path.dirname(tilePath));
+      fs.writeFileSync(tmpTilePath, data, { encoding: 'binary' });
+      fs.renameSync(tmpTilePath, tilePath);
+    }
+  }
+
+  await pgClient.release();
+}
+
+async function serveOceans(res, request, response) {
+  // Data based on Natural Earth Data.
+  const filePath = './oceans.geojson';
+
+  const { size, mtime } = fs.statSync(filePath);
+
+  // ----- Send answer to client.
+  response.writeHead(200, {
+    'Content-Type': 'application/geo+json',
+    'Content-Length': size,
+    'Access-Control-Allow-Origin': '*',
+    'Last-Modified': mtime,
+  });
+
+  fs.createReadStream(filePath).pipe(response);
+}
+
+const controllers = [
+  [/\/tiles\/(?<type>[a-z0-9_]+)\/(?<z>[0-9]+)\/(?<x>[0-9]+)\/(?<y>[0-9]+).pbf/, serverTile],
+  [new RegExp('^/oceans.geojson$'), serveOceans],
+];
+
 http.createServer(async (request, response) => {
   try {
-    const res = /\/tiles\/(?<type>[a-z0-9_]+)\/(?<z>[0-9]+)\/(?<x>[0-9]+)\/(?<y>[0-9]+).pbf/.exec(request.url);
+    let done = false;
 
-    if (res) {
-      const pgClient = await pgPool.connect();
-
-      // ---- Check mtime from database.
-      const pgMtime = await getPgMtime(pgClient);
-
-      let done = false;
-
-      if (request.headers['if-modified-since']) {
-        const remoteMTime = new Date(request.headers['if-modified-since']).getTime();
-
-        if (remoteMTime === pgMtime) {
-          response.writeHead(304, {
-            'Access-Control-Allow-Origin': '*',
-            'Last-Modified': new Date(pgMtime).toUTCString(),
-          });
-
-          response.end();
-
-          done = true;
-        }
+    for (const controller of controllers) {
+      const res = controller[0].exec(request.url);
+      if (res) {
+        await controller[1](res, request, response);
+        done = true;
+        break;
       }
+    }
 
-      if (!done) {
-        const {
-          type, x, y, z,
-        } = res.groups;
-
-        // ----- Check if tile is already in the cache.
-        const tilePath = path.join(CONFIG.cacheDir, `${type}/${z}/${x}/${y}.pbf`);
-
-        if (fs.existsSync(tilePath)) {
-          // ----- Send cached tile to to client.
-          const data = fs.readFileSync(tilePath);
-
-          response.writeHead(200, {
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': data.length,
-            'Access-Control-Allow-Origin': '*',
-            'From-Cache' : true,
-            'Last-Modified': fs.statSync(tilePath).mtime.toUTCString(),
-          });
-
-          response.end(data, 'binary');
-        } else {
-          // ----- Get tile data from database.
-          const pgRes = await pgClient.query(genQuery(type, x, y, z));
-          const data = pgRes.rows[0].st_asmvt;
-
-          // ----- Send answer to client.
-          response.writeHead(200, {
-            'Content-Type': 'application/octet-stream',
-            'Content-Length': data.length,
-            'Access-Control-Allow-Origin': '*',
-            'From-Cache' : false,
-            'Last-Modified': new Date(pgMtime).toUTCString(),
-          });
-
-          response.end(data, 'binary');
-
-          // ----- Save generated tile in cache.
-          // Temporary name in case we have concurrent connection asking for the same tile.
-          const tmpTilePath = `${tilePath}.tmp_${new Date().getTime()}`;
-
-          mkdirp.sync(path.dirname(tilePath));
-          fs.writeFileSync(tmpTilePath, data, { encoding: 'binary' });
-          fs.renameSync(tmpTilePath, tilePath);
-        }
-      }
-
-      await pgClient.release();
-    } else {
+    if (!done) {
       response.writeHead(404, { 'Content-Type': 'text/plain' });
       response.end(`404 ${http.STATUS_CODES[404]}`);
     }

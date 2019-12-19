@@ -34,7 +34,7 @@ services:
       - "traefik.enable=true"
       - "traefik.port=8080"
       - "traefik.http.routers.maps-server.entrypoints=web"
-      - "traefik.http.routers.maps-server.rule=PathPrefix(`/tiles`)"
+      - "traefik.http.routers.maps-server.rule=PathPrefix(`/tiles`) || PathPrefix(`/oceans.geojson`)"
     #ports:
       #- "8083:80"
 
@@ -49,4 +49,4 @@ volumes:
   maps-importer:
   maps-postgis:
   maps-server:
-  
+
