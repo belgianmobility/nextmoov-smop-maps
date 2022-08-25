@@ -76,9 +76,6 @@ async function importOceansData(data) {
 async function importOsmFile() {
   const mappingFile = path.join(path.dirname(module.filename), 'mapping.yml');
 
-  // Data extracted from Natural Earth.
-  const oceansFile = path.join(path.dirname(module.filename), 'oceans.json');
-
   logger.info(`Reading ${CONFIG.osmFilePath}...`);
 
   await spawnImposm([
@@ -98,13 +95,6 @@ async function importOsmFile() {
     '-write',
     '-connection', CONFIG.postgisConnection,
   ], fs.createWriteStream(CONFIG.imposmLogFilePath, { flags: 'a' }));
-
-  logger.info('Import oceans...');
-
-  const oceanFileData = JSON.parse(fs.readFileSync(oceansFile));
-  const oceansGeoJson = oceanFileData.features[0].geometry;
-  await importOceansData(oceansGeoJson);
-
 
   logger.info('Deploy production tables...');
 
